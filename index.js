@@ -1,7 +1,9 @@
 const axios = require("axios").default;
 const http = require("http");
 const Redis = require("ioredis");
-const redis = new Redis();
+const redis = new Redis({
+    maxRetriesPerRequest: 1
+});
 
 const server = http.createServer(async (req, res) => {
     console.log("req.method", req.method);
