@@ -1,28 +1,35 @@
-const { default: axios } = require("axios");
+const axios = require("axios").default;
+const http = require("http");
 const Redis = require("ioredis");
 const redis = new Redis();
-const app = require("express")()
 
-app.get("/get-todos", async (req, res) => {
-    try {
-        const cachedData = await redis.get("get-todos")
+const server = http.createServer(async (req, res) => {
+    if (req.method === 'GET' && req.url === '/get-todos') {
+        try {
+            const cachedData = await redis.get("get-todos");
 
-        if (cachedData) {
-            res.send(JSON.parse(cachedData))
-        } else {
-            await axios.get("https://jsonplaceholder.typicode.com/todos").then(async (response) => {
-                res.send(response.data)
-                await redis.set("get-todos", JSON.stringify(response.data))
-            }).catch((err) => {
-                res.send(err)
-            })
+            if (cachedData) {
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(cachedData);
+            } else {
+                const response = await axios.get("https://jsonplaceholder.typicode.com/todos");
+                const todosData = JSON.stringify(response.data);
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(todosData);
+                await redis.set("get-todos", todosData);
+            }
+
+        } catch (error) {
+            res.writeHead(500, { 'Content-Type': 'text/plain' });
+            res.end(error.message);
         }
-
-    } catch (error) {
-        res.send(error)
+    } else {
+        res.writeHead(404, { 'Content-Type': 'text/plain' });
+        res.end('Not Found');
     }
-})
+});
 
-app.listen("5000", () => {
-    console.log("Server started on port 5000");
-})
+const PORT = process.env.PORT || 3001;
+server.listen(PORT, () => {
+    console.log(`Server started on port ${PORT}`);
+});
