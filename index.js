@@ -19,7 +19,7 @@ const server = http.createServer(async (req, res) => {
                 const todosData = JSON.stringify(response.data);
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.end(todosData);
-                await redis.set("get-todos", todosData);
+                await redis.set("get-todos", todosData, "EX", 60);
             }
 
         } catch (error) {
