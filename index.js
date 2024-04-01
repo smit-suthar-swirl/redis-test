@@ -11,6 +11,7 @@ const server = http.createServer(async (req, res) => {
             const cachedData = await redis.get("get-todos");
 
             if (cachedData) {
+                console.log(JSON.parse(cachedData));
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.end(cachedData);
             } else {
