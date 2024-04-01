@@ -4,6 +4,8 @@ const Redis = require("ioredis");
 const redis = new Redis();
 
 const server = http.createServer(async (req, res) => {
+    console.log("req.method", req.method);
+    console.log("req.url", req.url);
     if (req.method === 'GET' && req.url === '/get-todos') {
         try {
             const cachedData = await redis.get("get-todos");
